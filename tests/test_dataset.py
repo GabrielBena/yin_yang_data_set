@@ -2,7 +2,7 @@ import unittest
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from dataset import YinYangDataset
+from SNN.data.yin_yang_data_set.yingyang.dataset import YinYangDataset
 from torch.utils.data import DataLoader
 
 
