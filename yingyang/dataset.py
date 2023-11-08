@@ -9,8 +9,8 @@ class YinYangDataset(Dataset):
         self.transform = transform
         self.r_small = r_small
         self.r_big = r_big
-        self.__vals = []
-        self.__cs = []
+        self.data = []
+        self.targets = []
         self.class_names = ['yin', 'yang', 'dot']
         for i in range(size):
             # keep num of class instances balanced by using rejection sampling
@@ -21,8 +21,8 @@ class YinYangDataset(Dataset):
             x_flipped = 1. - x
             y_flipped = 1. - y
             val = np.array([x, y, x_flipped, y_flipped])
-            self.__vals.append(val)
-            self.__cs.append(c)
+            self.data.append(val)
+            self.targets.append(c)
 
     def get_sample(self, goal=None):
         # sample until goal is satisfied
@@ -61,10 +61,10 @@ class YinYangDataset(Dataset):
         return np.sqrt((x - 0.5 * self.r_big)**2 + (y - self.r_big)**2)
 
     def __getitem__(self, index):
-        sample = (self.__vals[index].copy(), self.__cs[index])
+        sample = (self.data[index].copy(), self.targets[index])
         if self.transform:
             sample = self.transform(sample)
         return sample
 
     def __len__(self):
-        return len(self.__cs)
+        return len(self.targets)
