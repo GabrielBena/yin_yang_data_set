@@ -6,9 +6,9 @@ from torch.utils.data import ConcatDataset
 
 def get_seeds_and_rotations(n_tasks):
 
-    train_rotations = np.linspace(0, np.pi, n_tasks, endpoint=False)
-    test_rotations = np.linspace(np.pi, 3 * np.pi / 2, n_tasks, endpoint=False)
-    val_rotations = np.linspace(3 * np.pi / 2, 2 * np.pi, n_tasks, endpoint=False)
+    train_rotations = np.linspace(0, np.pi / 2, n_tasks, endpoint=False)
+    test_rotations = np.linspace(np.pi / 2, np.pi / 2, n_tasks, endpoint=False)
+    val_rotations = np.linspace(np.pi / 2, np.pi, n_tasks, endpoint=False)
 
     train_seeds = np.arange(0, 2 * n_tasks, 2)
     test_seeds = np.arange(2 * n_tasks, 4 * n_tasks, 2)
