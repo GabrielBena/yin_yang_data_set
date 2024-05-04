@@ -2,17 +2,29 @@ from yingyang.dataset import YinYangDataset
 from torchmeta.utils.data import ClassDataset, CombinationMetaDataset
 import numpy as np
 from torch.utils.data import ConcatDataset
+from torchmeta.utils.data import BatchMetaDataLoader
 
 
 def get_seeds_and_rotations(n_tasks):
 
-    train_rotations = np.linspace(0, 3/4 * np.pi, n_tasks, endpoint=False)
-    test_rotations = np.linspace(3/4 * np.pi, np.pi, n_tasks, endpoint=False)
+    train_rotations = np.concatenate(
+        [
+            np.linspace(0, 1 / 2 * np.pi, n_tasks, endpoint=False),
+            np.linspace(np.pi, 3 / 2 * np.pi, n_tasks, endpoint=False),
+        ]
+    )
+    test_rotations = np.concatenate(
+        [
+            np.linspace(1 / 2 * np.pi, np.pi, n_tasks, endpoint=False),
+            np.linspace(3 / 2 * np.pi, 2 * np.pi, n_tasks, endpoint=False),
+        ]
+    )
+
     val_rotations = np.linspace(np.pi / 2, np.pi, n_tasks, endpoint=False)
 
-    train_seeds = np.arange(0, 2 * n_tasks, 2)
-    test_seeds = np.arange(2 * n_tasks, 4 * n_tasks, 2)
-    val_seeds = np.arange(4 * n_tasks, 6 * n_tasks, 2)
+    train_seeds = np.arange(0, 2 * n_tasks * 2, 2)
+    test_seeds = np.arange(2 * n_tasks, 4 * n_tasks * 2, 2)
+    val_seeds = np.arange(4 * n_tasks, 6 * n_tasks * 2, 2)
 
     rotations = {"train": train_rotations, "test": test_rotations, "val": val_rotations}
     seeds = {"train": train_seeds, "test": test_seeds, "val": val_seeds}
@@ -51,7 +63,9 @@ class YinYangClassDataset(ClassDataset):
         )
 
         self.data_config = data_config
-        self.rotations, self.seeds = get_seeds_and_rotations(data_config["n_tasks_per_split"])
+        self.rotations, self.seeds = get_seeds_and_rotations(
+            data_config[f"n_tasks_per_split_{self.split_name}"]
+        )
         self._labels = np.arange(len(self.rotations[split_name]))
         self._num_classes = len(self.rotations[split_name])
         self.loaded_datasets = {}
@@ -123,3 +137,62 @@ class YingYangMetaDataset(CombinationMetaDataset):
             num_classes_per_task=num_classes_per_task,
             dataset_transform=dataset_transform,
         )
+
+
+def get_all_datasets(data_config, dataset_split, encode_tranform):
+
+    meta_train_dataset = YingYangMetaDataset(
+        num_classes_per_task=1,
+        meta_train=True,
+        transform=encode_tranform,
+        data_config=data_config,
+        dataset_transform=dataset_split,
+    )
+    meta_val_dataset = YingYangMetaDataset(
+        num_classes_per_task=1,
+        meta_val=True,
+        transform=encode_tranform,
+        data_config=data_config,
+        dataset_transform=dataset_split,
+    )
+    meta_test_dataset = YingYangMetaDataset(
+        num_classes_per_task=1,
+        meta_test=True,
+        transform=encode_tranform,
+        data_config=data_config,
+        dataset_transform=dataset_split,
+    )
+
+    meta_train_dataloader = BatchMetaDataLoader(
+        meta_train_dataset,
+        data_config["meta_batch_size"],
+        shuffle=True,
+        num_workers=0,
+    )
+
+    meta_val_dataloader = BatchMetaDataLoader(
+        meta_val_dataset,
+        data_config["meta_batch_size"],
+        shuffle=False,
+        num_workers=0,
+    )
+
+    meta_test_dataloader = BatchMetaDataLoader(
+        meta_test_dataset,
+        data_config["meta_batch_size"],
+        shuffle=False,
+        num_workers=0,
+    )
+
+    return (
+        (
+            meta_train_dataset,
+            meta_val_dataset,
+            meta_test_dataset,
+        ),
+        (
+            meta_train_dataloader,
+            meta_val_dataloader,
+            meta_test_dataloader,
+        ),
+    )
