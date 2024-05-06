@@ -9,22 +9,22 @@ def get_seeds_and_rotations(n_tasks):
 
     train_rotations = np.concatenate(
         [
-            np.linspace(0, 1 / 2 * np.pi, n_tasks, endpoint=False),
-            np.linspace(np.pi, 3 / 2 * np.pi, n_tasks, endpoint=False),
+            np.linspace(0, 1 / 2 * np.pi, n_tasks // 2, endpoint=False),
+            np.linspace(np.pi, 3 / 2 * np.pi, n_tasks // 2, endpoint=False),
         ]
     )
     test_rotations = np.concatenate(
         [
-            np.linspace(1 / 2 * np.pi, np.pi, n_tasks, endpoint=False),
-            np.linspace(3 / 2 * np.pi, 2 * np.pi, n_tasks, endpoint=False),
+            np.linspace(1 / 2 * np.pi, np.pi, n_tasks // 2, endpoint=False),
+            np.linspace(3 / 2 * np.pi, 2 * np.pi, n_tasks // 2, endpoint=False),
         ]
     )
 
-    val_rotations = np.linspace(np.pi / 2, np.pi, n_tasks, endpoint=False)
+    val_rotations = np.linspace(np.pi / 2, np.pi, n_tasks // 2, endpoint=False)
 
-    train_seeds = np.arange(0, 2 * n_tasks * 2, 2)
-    test_seeds = np.arange(2 * n_tasks, 4 * n_tasks * 2, 2)
-    val_seeds = np.arange(4 * n_tasks, 6 * n_tasks * 2, 2)
+    train_seeds = np.arange(0, 2 * n_tasks, 2)
+    test_seeds = np.arange(2 * n_tasks, 4 * n_tasks, 2)
+    val_seeds = np.arange(4 * n_tasks, 6 * n_tasks, 2)
 
     rotations = {"train": train_rotations, "test": test_rotations, "val": val_rotations}
     seeds = {"train": train_seeds, "test": test_seeds, "val": val_seeds}
